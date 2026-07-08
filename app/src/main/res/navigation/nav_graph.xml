@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.laptopstore.app.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_navigation_home_to_productDetailFragment"
+            app:destination="@id/productDetailFragment" />
+        <action
+            android:id="@+id/action_navigation_home_to_searchFilterFragment"
+            app:destination="@id/searchFilterFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchFilterFragment"
+        android:name="com.laptopstore.app.ui.home.SearchFilterFragment"
+        android:label="Advanced Search"
+        tools:layout="@layout/fragment_search_filter">
+        <action
+            android:id="@+id/action_searchFilter_to_searchResults"
+            app:destination="@id/searchResultsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/searchResultsFragment"
+        android:name="com.laptopstore.app.ui.search.SearchResultsFragment"
+        android:label="Search Results"
+        tools:layout="@layout/fragment_search_results">
+        <argument
+            android:name="keyword"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="minPrice"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="maxPrice"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="ram"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="cpu"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_searchResults_to_productDetailFragment"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/productDetailFragment"
+        android:name="com.laptopstore.app.ui.product.ProductDetailFragment"
+        android:label="Product Details"
+        tools:layout="@layout/fragment_product_detail">
+        <argument
+            android:name="productId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_categories"
+        android:name="com.laptopstore.app.ui.categories.CategoriesFragment"
+        android:label="Categories"
+        tools:layout="@layout/fragment_categories">
+        <action
+            android:id="@+id/action_navigation_categories_to_categoryProductsFragment"
+            app:destination="@id/categoryProductsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/categoryProductsFragment"
+        android:name="com.laptopstore.app.ui.categories.CategoryProductsFragment"
+        android:label="Category Products"
+        tools:layout="@layout/fragment_category_products">
+        <argument
+            android:name="categoryId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+        <argument
+            android:name="categoryName"
+            app:argType="string"
+            android:defaultValue="Products" />
+        <action
+            android:id="@+id/action_categoryProductsFragment_to_productDetailFragment"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_cart"
+        android:name="com.laptopstore.app.ui.cart.CartFragment"
+        android:label="Cart"
+        tools:layout="@layout/fragment_cart">
+        <action
+            android:id="@+id/action_navigation_cart_to_checkoutFragment"
+            app:destination="@id/checkoutFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/checkoutFragment"
+        android:name="com.laptopstore.app.ui.checkout.CheckoutFragment"
+        android:label="Checkout"
+        tools:layout="@layout/fragment_checkout">
+        <action
+            android:id="@+id/action_checkoutFragment_to_navigation_home"
+            app:destination="@id/navigation_home"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.laptopstore.app.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_navigation_profile_to_adminDashboardFragment"
+            app:destination="@id/adminDashboardFragment" />
+        <action
+            android:id="@+id/action_navigation_profile_to_editProfileFragment"
+            app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_navigation_profile_to_orderHistoryFragment"
+            app:destination="@id/orderHistoryFragment" />
+        <action
+            android:id="@+id/action_navigation_profile_to_wishlistFragment"
+            app:destination="@id/wishlistFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.laptopstore.app.ui.profile.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
+
+    <fragment
+        android:id="@+id/wishlistFragment"
+        android:name="com.laptopstore.app.ui.wishlist.WishlistFragment"
+        android:label="Wishlist"
+        tools:layout="@layout/fragment_wishlist">
+        <action
+            android:id="@+id/action_wishlistFragment_to_productDetailFragment"
+            app:destination="@id/productDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/orderHistoryFragment"
+        android:name="com.laptopstore.app.ui.profile.OrderHistoryFragment"
+        android:label="Order History"
+        tools:layout="@layout/fragment_order_history">
+        <action
+            android:id="@+id/action_orderHistoryFragment_to_userOrderDetailFragment"
+            app:destination="@id/userOrderDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/userOrderDetailFragment"
+        android:name="com.laptopstore.app.ui.profile.UserOrderDetailFragment"
+        android:label="Order Details"
+        tools:layout="@layout/fragment_user_order_detail">
+        <argument
+            android:name="orderId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+        <action
+            android:id="@+id/action_userOrderDetailFragment_to_writeReviewFragment"
+            app:destination="@id/writeReviewFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/writeReviewFragment"
+        android:name="com.laptopstore.app.ui.profile.WriteReviewFragment"
+        android:label="Write Review"
+        tools:layout="@layout/fragment_write_review">
+        <argument
+            android:name="productId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+        <argument
+            android:name="productName"
+            app:argType="string"
+            android:defaultValue="Product" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.laptopstore.app.ui.admin.AdminDashboardFragment"
+        android:label="Admin Dashboard"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminOrderListFragment"
+            app:destination="@id/adminOrderListFragment" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminCategoryListFragment"
+            app:destination="@id/adminCategoryListFragment" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminBrandListFragment"
+            app:destination="@id/adminBrandListFragment" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminProductListFragment"
+            app:destination="@id/adminProductListFragment" />
+        <action
+            android:id="@+id/action_adminDashboardFragment_to_adminUserListFragment"
+            app:destination="@id/adminUserListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminOrderListFragment"
+        android:name="com.laptopstore.app.ui.admin.order.AdminOrderListFragment"
+        android:label="Manage Orders"
+        tools:layout="@layout/fragment_admin_order_list">
+        <action
+            android:id="@+id/action_adminOrderListFragment_to_adminOrderDetailFragment"
+            app:destination="@id/adminOrderDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminOrderDetailFragment"
+        android:name="com.laptopstore.app.ui.admin.order.AdminOrderDetailFragment"
+        android:label="Order Details"
+        tools:layout="@layout/fragment_admin_order_detail">
+        <argument
+            android:name="orderId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminCategoryListFragment"
+        android:name="com.laptopstore.app.ui.admin.category.AdminCategoryListFragment"
+        android:label="Manage Categories"
+        tools:layout="@layout/fragment_admin_category_list">
+        <action
+            android:id="@+id/action_adminCategoryListFragment_to_adminCategoryDetailFragment"
+            app:destination="@id/adminCategoryDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminCategoryDetailFragment"
+        android:name="com.laptopstore.app.ui.admin.category.AdminCategoryDetailFragment"
+        android:label="Category Details"
+        tools:layout="@layout/fragment_admin_category_detail">
+        <argument
+            android:name="categoryId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminBrandListFragment"
+        android:name="com.laptopstore.app.ui.admin.brand.AdminBrandListFragment"
+        android:label="Manage Brands"
+        tools:layout="@layout/fragment_admin_brand_list">
+        <action
+            android:id="@+id/action_adminBrandListFragment_to_adminBrandDetailFragment"
+            app:destination="@id/adminBrandDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminBrandDetailFragment"
+        android:name="com.laptopstore.app.ui.admin.brand.AdminBrandDetailFragment"
+        android:label="Brand Details"
+        tools:layout="@layout/fragment_admin_brand_detail">
+        <argument
+            android:name="brandId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminProductListFragment"
+        android:name="com.laptopstore.app.ui.admin.product.AdminProductListFragment"
+        android:label="Manage Products"
+        tools:layout="@layout/fragment_admin_product_list">
+        <action
+            android:id="@+id/action_adminProductListFragment_to_adminProductDetailFragment"
+            app:destination="@id/adminProductDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminProductDetailFragment"
+        android:name="com.laptopstore.app.ui.admin.product.AdminProductDetailFragment"
+        android:label="Product Details"
+        tools:layout="@layout/fragment_admin_product_detail">
+        <argument
+            android:name="productId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminUserListFragment"
+        android:name="com.laptopstore.app.ui.admin.user.AdminUserListFragment"
+        android:label="Manage Users"
+        tools:layout="@layout/fragment_admin_user_list">
+        <action
+            android:id="@+id/action_adminUserListFragment_to_adminUserDetailFragment"
+            app:destination="@id/adminUserDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminUserDetailFragment"
+        android:name="com.laptopstore.app.ui.admin.user.AdminUserDetailFragment"
+        android:label="User Details"
+        tools:layout="@layout/fragment_admin_user_detail">
+        <argument
+            android:name="userId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+</navigation>

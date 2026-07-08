@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">LaptopShop</string>
+    <string-array name="order_status_array">
+        <item>PENDING</item>
+        <item>READY_TO_SHIP</item>
+        <item>SHIPPING</item>
+        <item>DELIVERED</item>
+        <item>FAILED</item>
+        <item>RETURNED</item>
+    </string-array>
+</resources>

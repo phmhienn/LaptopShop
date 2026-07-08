@@ -1,0 +1,94 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+target/
+
+# Gradle files
+.gradle/
+build/
+*/build/
+gradlew.bat
+
+# If you use Gradle Wrapper, you should NOT ignore the gradle-wrapper.jar
+# but you SHOULD ignore the generated zip file
+gradle-wrapper.jar
+gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+*.zip
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log Files
+*.log
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+*.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Backend (Spring Boot / Maven)
+Backend/target/
+Backend/.mvn/wrapper/maven-wrapper.jar
+!Backend/.mvn/wrapper/maven-wrapper.properties
+
+# Frontend/App specific
+app/build/
+app/.cxx/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (if any)
+google-services.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
