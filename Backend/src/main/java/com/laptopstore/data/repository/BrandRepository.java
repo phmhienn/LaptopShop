@@ -27,4 +27,9 @@ public interface BrandRepository extends JpaRepository<Brand, Long> {
 
     @Query("SELECT b FROM Brand b WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Brand> searchBrands(@Param("keyword") String keyword, Pageable pageable);
+
+    // Dùng để kiểm tra trước khi xóa brand — tránh lazy-load products bị @JsonIgnore
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.brand.id = :brandId")
+    long countProductsByBrandId(@Param("brandId") Long brandId);
 }
+

@@ -98,6 +98,17 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Cache — Caffeine in-memory cache với TTL và LRU eviction -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <!-- Version được quản lý bởi Spring Boot BOM -->
+        </dependency>
     </dependencies>
 
     <build>

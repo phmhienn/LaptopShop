@@ -1,7 +1,9 @@
 package com.laptopstore.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,7 +38,10 @@ public class Brand {
     @Builder.Default
     private Boolean status = true;
 
+    // @JsonIgnore — tránh serialize toàn bộ list products khi Brand bị embed trong response
+    @JsonIgnore
     @OneToMany(mappedBy = "brand", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     @Builder.Default
     private List<Product> products = new ArrayList<>();
 

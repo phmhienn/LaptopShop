@@ -4,6 +4,7 @@ import com.laptopstore.common.enums.ShipmentStatus;
 import com.laptopstore.data.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,11 +22,29 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     long countByCreatedAtAfter(LocalDateTime date);
 
-    Optional<Order> findByIdAndUserId(Long id, Long userId);
+    // JOIN FETCH tất cả relations cần thiết trong 1 query — loại bỏ N+1
+    @Query("SELECT DISTINCT o FROM Order o " +
+           "LEFT JOIN FETCH o.orderItems oi " +
+           "LEFT JOIN FETCH oi.product " +
+           "LEFT JOIN FETCH o.payment " +
+           "LEFT JOIN FETCH o.shipment " +
+           "WHERE o.id = :id AND o.user.id = :userId")
+    Optional<Order> findByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
+
+    // JOIN FETCH cho admin lookup theo ID
+    @Query("SELECT DISTINCT o FROM Order o " +
+           "LEFT JOIN FETCH o.orderItems oi " +
+           "LEFT JOIN FETCH oi.product " +
+           "LEFT JOIN FETCH o.payment " +
+           "LEFT JOIN FETCH o.shipment " +
+           "WHERE o.id = :id")
+    Optional<Order> findByIdWithDetails(@Param("id") Long id);
 
     @Query("SELECT COUNT(o) > 0 FROM Order o JOIN o.orderItems oi WHERE o.user.id = :userId AND oi.product.id = :productId AND o.shipment.status = 'DELIVERED'")
     boolean hasUserPurchasedProduct(@Param("userId") Long userId, @Param("productId") Long productId);
 
+    // EntityGraph cho danh sách orders — load relations cần thiết
+    @EntityGraph(attributePaths = {"orderItems", "payment", "shipment"})
     Page<Order> findByUserId(Long userId, Pageable pageable);
 
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND o.shipment.status = :status")

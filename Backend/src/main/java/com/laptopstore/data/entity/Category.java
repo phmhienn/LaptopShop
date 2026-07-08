@@ -1,7 +1,9 @@
 package com.laptopstore.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,7 +38,10 @@ public class Category {
     @JoinColumn(name = "parent_id")
     private Category parent;
 
+    // @JsonIgnore — tránh vòng lặp vô hạn khi Category chứa danh sách children lại chứa parent
+    @JsonIgnore
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     @Builder.Default
     private List<Category> children = new ArrayList<>();
 
@@ -44,7 +49,10 @@ public class Category {
     @Builder.Default
     private Boolean status = true;
 
+    // @JsonIgnore — tránh serialize toàn bộ list products khi Category bị embed trong response
+    @JsonIgnore
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
     @Builder.Default
     private List<Product> products = new ArrayList<>();
 

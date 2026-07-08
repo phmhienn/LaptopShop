@@ -26,7 +26,8 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional
     public Wishlist getWishlistByUserId(Long userId) {
-        return wishlistRepository.findFirstByUserId(userId).orElseGet(() -> {
+        // Dùng JOIN FETCH để load items + product trong 1 query, tránh N+1
+        return wishlistRepository.findFirstByUserIdWithItems(userId).orElseGet(() -> {
             User user = userService.getUserById(userId);
             Wishlist newWishlist = new Wishlist();
             newWishlist.setUser(user);
@@ -76,7 +77,7 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     @Transactional(readOnly = true)
     public boolean isProductInWishlist(Long userId, Long productId) {
-        Wishlist wishlist = getWishlistByUserId(userId);
-        return wishlistItemRepository.existsByWishlistIdAndProductId(wishlist.getId(), productId);
+        // Query trực tiếp theo userId+productId — tránh load cả Wishlist entity không cần thiết
+        return wishlistItemRepository.existsByUserIdAndProductId(userId, productId);
     }
 }

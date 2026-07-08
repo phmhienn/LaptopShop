@@ -5,6 +5,7 @@ import com.laptopstore.data.entity.Product;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,11 +34,13 @@ public class ProductSpecification {
             }
 
             if (brandId != null) {
-                predicates.add(criteriaBuilder.equal(root.join("brand").get("id"), brandId));
+                // LEFT JOIN — tránh loại bỏ sản phẩm không có brand
+                predicates.add(criteriaBuilder.equal(root.join("brand", JoinType.LEFT).get("id"), brandId));
             }
 
             if (categoryId != null) {
-                predicates.add(criteriaBuilder.equal(root.join("category").get("id"), categoryId));
+                // LEFT JOIN — tránh loại bỏ sản phẩm không có category
+                predicates.add(criteriaBuilder.equal(root.join("category", JoinType.LEFT).get("id"), categoryId));
             }
 
             if (minPrice != null) {

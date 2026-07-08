@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -56,22 +57,24 @@ public class OrderServiceImpl implements OrderService {
         shipment.setReceiverPhone(request.getShippingPhone());
         shipment.setReceiverAddress(request.getShippingAddress());
         shipment.setStatus(ShipmentStatus.PENDING);
-        shipment.setShippingFee(java.math.BigDecimal.ZERO); // Default or could be calculated
+        shipment.setShippingFee(java.math.BigDecimal.ZERO);
         
         order.setShipment(shipment);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
+        // Map tích lũy inventory changes — batch update sau vòng lặp, tránh N*2 queries
+        Map<Long, Integer> inventoryChanges = new java.util.HashMap<>();
 
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
             
-            // Check inventory again
+            // Check inventory
             if (product.getStock() < cartItem.getQuantity()) {
                 throw new ValidationException("Not enough stock for product: " + product.getName());
             }
             
-            // Deduct inventory
-            productService.updateInventory(product.getId(), product.getStock() - cartItem.getQuantity());
+            // Tích lũy thay đổi — KHÔNG gọi updateInventory trong loop
+            inventoryChanges.put(product.getId(), product.getStock() - cartItem.getQuantity());
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
@@ -117,9 +120,10 @@ public class OrderServiceImpl implements OrderService {
         payment.setStatus(PaymentStatus.UNPAID);
         order.setPayment(payment);
 
-
-
         Order savedOrder = orderRepository.save(order);
+
+        // Batch update inventory sau khi order đã được save — 1 lần thay vì N*2 queries
+        productService.batchUpdateInventory(inventoryChanges);
 
         // Clear cart after successful order creation
         cartService.clearCart(userId);
@@ -137,7 +141,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
+        // Dùng JOIN FETCH query — load orderItems + payment + shipment trong 1 query
+        return orderRepository.findByIdWithDetails(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
     }
 
@@ -176,18 +181,22 @@ public class OrderServiceImpl implements OrderService {
         if (order.getShipment().getStatus() != ShipmentStatus.PENDING && order.getShipment().getStatus() != ShipmentStatus.READY_TO_SHIP) {
             throw new ValidationException("Cannot cancel order that is already being processed or shipped");
         }
-        
+
         order.getShipment().setStatus(ShipmentStatus.FAILED);
         if (order.getPayment().getStatus() == PaymentStatus.UNPAID) {
             order.getPayment().setStatus(PaymentStatus.FAILED);
         }
 
-        // Restore inventory
+        // Tích lũy inventory restores — tránh N+1 query trong loop
+        Map<Long, Integer> inventoryRestores = new java.util.HashMap<>();
         for (OrderItem item : order.getOrderItems()) {
             Product product = item.getProduct();
-            productService.updateInventory(product.getId(), product.getStock() + item.getQuantity());
+            inventoryRestores.put(product.getId(), product.getStock() + item.getQuantity());
         }
 
         orderRepository.save(order);
+
+        // Batch restore inventory — 1 lần thay vì N*2 queries
+        productService.batchUpdateInventory(inventoryRestores);
     }
 }

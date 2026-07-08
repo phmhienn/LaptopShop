@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+
 import java.util.List;
 
 @Service
@@ -22,6 +25,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "brands", allEntries = true)
     public Brand createBrand(Brand brand) {
         if (brandRepository.existsByName(brand.getName())) {
             throw new ValidationException("Brand name already exists");
@@ -38,6 +42,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "brands", allEntries = true)
     public Brand updateBrand(Long id, Brand brandDetails) {
         Brand brand = getBrandById(id);
         
@@ -76,18 +81,21 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "brands", allEntries = true)
     public void deleteBrand(Long id) {
         Brand brand = getBrandById(id);
-        
-        if (!brand.getProducts().isEmpty()) {
+
+        // Dùng repository count thay vì brand.getProducts() (bị @JsonIgnore lazy-load rủi)
+        if (brandRepository.countProductsByBrandId(id) > 0) {
             throw new ValidationException("Cannot delete brand that has products. Consider disabling it instead.");
         }
-        
+
         brandRepository.delete(brand);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "brands", allEntries = true)
     public void toggleBrandStatus(Long id) {
         Brand brand = getBrandById(id);
         brand.setStatus(!brand.getStatus());
@@ -105,6 +113,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "brands", key = "'allActive'")
     public List<Brand> getAllActiveBrands() {
         return brandRepository.findAllActive();
     }

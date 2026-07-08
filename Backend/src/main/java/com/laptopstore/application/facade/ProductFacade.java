@@ -16,13 +16,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -121,29 +122,54 @@ public class ProductFacade {
         productService.updateInventory(productId, quantity);
     }
 
+    // ----------------------------------------------------------------
     // Helper methods
-    
+    // ----------------------------------------------------------------
+
     private Pageable getPageable(int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         return PageRequest.of(page, size, sort);
     }
 
+    /** Single product — 2 queries là chấp nhận được */
     private ProductDetailDTO mapToDetailDTO(Product product) {
         Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
         Long totalReviews = reviewRepository.countApprovedReviewsByProductId(product.getId());
         return productMapper.toProductDetailDTO(product, avgRating, totalReviews);
     }
 
-    private ProductDTO mapToDTO(Product product) {
-        Double avgRating = reviewRepository.getAverageRatingByProductId(product.getId());
-        Long totalReviews = reviewRepository.countApprovedReviewsByProductId(product.getId());
-        return productMapper.toProductDTO(product, avgRating, totalReviews);
-    }
-
+    /**
+     * Batch approach: thay vì N×2 queries (mỗi product gọi getAvgRating + countReviews riêng),
+     * dùng 1 query GROUP BY để lấy stats cho toàn bộ trang.
+     * Trang 20 sản phẩm: từ 40 queries → 1 query.
+     */
     private PagedResponse<ProductDTO> mapToPagedResponse(Page<Product> productsPage) {
-        List<ProductDTO> content = productsPage.getContent().stream()
-                .map(this::mapToDTO)
+        List<Product> products = productsPage.getContent();
+
+        if (products.isEmpty()) {
+            return PagedResponse.of(List.of(), productsPage.getNumber(), productsPage.getSize(),
+                    productsPage.getTotalElements(), productsPage.getTotalPages());
+        }
+
+        // 1 query duy nhất để lấy rating stats cho toàn bộ sản phẩm trong trang
+        List<Long> productIds = products.stream().map(Product::getId).collect(Collectors.toList());
+        List<Object[]> ratingStats = reviewRepository.getAvgRatingAndCountByProductIds(productIds);
+
+        // Build lookup map: productId → [avgRating, count]
+        Map<Long, double[]> statsMap = new HashMap<>();
+        for (Object[] row : ratingStats) {
+            Long pid = ((Number) row[0]).longValue();
+            double avg = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+            long cnt = row[2] != null ? ((Number) row[2]).longValue() : 0L;
+            statsMap.put(pid, new double[]{avg, cnt});
+        }
+
+        List<ProductDTO> content = products.stream()
+                .map(product -> {
+                    double[] stats = statsMap.getOrDefault(product.getId(), new double[]{0.0, 0L});
+                    return productMapper.toProductDTO(product, stats[0], (long) stats[1]);
+                })
                 .collect(Collectors.toList());
 
         return PagedResponse.of(content, productsPage.getNumber(), productsPage.getSize(),

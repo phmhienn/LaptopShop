@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface ProductService {
     
@@ -40,4 +41,7 @@ public interface ProductService {
     
     // Inventory
     void updateInventory(Long productId, int quantity);
+
+    // Batch update inventory — tránh N+1 query trong loop
+    void batchUpdateInventory(Map<Long, Integer> productQuantities);
 }

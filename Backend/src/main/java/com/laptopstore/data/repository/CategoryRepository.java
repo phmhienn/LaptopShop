@@ -30,4 +30,12 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT c FROM Category c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Category> searchCategories(@Param("keyword") String keyword, Pageable pageable);
+
+    // Dùng để kiểm tra trước khi xóa — tránh lazy-load bị @JsonIgnore
+    @Query("SELECT COUNT(c) FROM Category c WHERE c.parent.id = :categoryId")
+    long countChildrenById(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
+    long countProductsByCategoryId(@Param("categoryId") Long categoryId);
 }
+

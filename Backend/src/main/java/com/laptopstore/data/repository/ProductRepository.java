@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -17,19 +18,25 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     Optional<Product> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     Page<Product> findByStatus(ProductStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     Page<Product> findByBrandIdAndStatus(Long brandId, ProductStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     Page<Product> findByCategoryIdAndStatus(Long categoryId, ProductStatus status, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND p.featured = true")
     Page<Product> findFeaturedProducts(Pageable pageable);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND " +
             "(LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -37,17 +44,20 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             "LOWER(p.gpu) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> searchProducts(@Param("keyword") String keyword, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' AND p.price BETWEEN :minPrice AND :maxPrice")
     Page<Product> findByPriceRange(@Param("minPrice") BigDecimal minPrice,
                                     @Param("maxPrice") BigDecimal maxPrice,
                                     Pageable pageable);
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     @Query("SELECT p FROM Product p WHERE p.id IN :ids AND p.status = 'ACTIVE'")
     List<Product> findActiveProductsByIds(@Param("ids") List<Long> ids);
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.status = 'ACTIVE'")
     long countActiveProducts();
 
+    @EntityGraph(attributePaths = {"brand", "category"})
     @Query("SELECT p FROM Product p WHERE p.status = 'ACTIVE' ORDER BY p.createdAt DESC")
     Page<Product> findLatestProducts(Pageable pageable);
 

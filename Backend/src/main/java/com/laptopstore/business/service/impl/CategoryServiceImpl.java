@@ -12,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+
 import java.util.List;
 
 @Service
@@ -22,6 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
     public Category createCategory(Category category, Long parentId) {
         if (categoryRepository.existsByName(category.getName())) {
             throw new ValidationException("Category name already exists");
@@ -43,6 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
     public Category updateCategory(Long id, Category categoryDetails, Long parentId) {
         Category category = getCategoryById(id);
         
@@ -87,22 +92,25 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(Long id) {
         Category category = getCategoryById(id);
-        
-        if (!category.getChildren().isEmpty()) {
+
+        // Dùng repository count thay vì getChildren()/getProducts() (bị @JsonIgnore)
+        if (categoryRepository.countChildrenById(id) > 0) {
             throw new ValidationException("Cannot delete category that has subcategories. Delete them first.");
         }
-        
-        if (!category.getProducts().isEmpty()) {
+
+        if (categoryRepository.countProductsByCategoryId(id) > 0) {
             throw new ValidationException("Cannot delete category that has products. Consider disabling it instead.");
         }
-        
+
         categoryRepository.delete(category);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
     public void toggleCategoryStatus(Long id) {
         Category category = getCategoryById(id);
         category.setStatus(!category.getStatus());
@@ -120,12 +128,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "categories", key = "'allActiveRoot'")
     public List<Category> getAllActiveRootCategories() {
         return categoryRepository.findAllActiveRootCategories();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "categories", key = "'allActive'")
     public List<Category> getAllActiveCategories() {
         return categoryRepository.findAllActive();
     }

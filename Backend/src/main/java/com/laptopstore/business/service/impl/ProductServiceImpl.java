@@ -24,9 +24,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "featured_products", allEntries = true)
     public Product createProduct(Product product, Long brandId, Long categoryId, MultipartFile thumbnail, List<MultipartFile> images) {
         product.setSlug(SlugUtils.toSlug(product.getName()));
         if (productRepository.existsBySlug(product.getSlug())) {
@@ -86,6 +91,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "featured_products", allEntries = true)
     public Product updateProduct(Long id, Product productDetails, Long brandId, Long categoryId, MultipartFile thumbnail) {
         Product product = getProductById(id);
         
@@ -138,6 +144,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "featured_products", allEntries = true)
     public void deleteProduct(Long id) {
         Product product = getProductById(id);
         
@@ -148,6 +155,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "featured_products", allEntries = true)
     public void toggleProductStatus(Long id) {
         Product product = getProductById(id);
         if (product.getStatus() == ProductStatus.ACTIVE) {
@@ -180,6 +188,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable("featured_products")
     public Page<Product> getFeaturedProducts(Pageable pageable) {
         return productRepository.findFeaturedProducts(pageable);
     }
@@ -250,5 +259,31 @@ public class ProductServiceImpl implements ProductService {
         
         inventoryRepository.save(inventory);
         productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void batchUpdateInventory(Map<Long, Integer> productQuantities) {
+        if (productQuantities == null || productQuantities.isEmpty()) return;
+
+        // 1 query để load tất cả inventories cần update — thay vì N queries riêng lẻ
+        List<Inventory> inventories = inventoryRepository.findByProductIdIn(productQuantities.keySet());
+
+        for (Inventory inventory : inventories) {
+            Long productId = inventory.getProduct().getId();
+            Integer newQuantity = productQuantities.get(productId);
+            if (newQuantity != null) {
+                if (newQuantity < 0) {
+                    throw new ValidationException("Inventory quantity cannot be negative for product: " + productId);
+                }
+                inventory.setQuantity(newQuantity);
+                inventory.setLastRestockedAt(LocalDateTime.now());
+                inventory.getProduct().setStock(newQuantity);
+            }
+        }
+
+        // Batch save tất cả — Hibernate sẽ gộp thành batch SQL
+        inventoryRepository.saveAll(inventories);
+        inventories.forEach(inv -> productRepository.save(inv.getProduct()));
     }
 }
