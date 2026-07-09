@@ -38,6 +38,12 @@ public class ProductDetail {
     @SerializedName("thumbnail")
     private String thumbnail;
     
+    @SerializedName("stock")
+    private Integer stock;
+
+    @SerializedName("warranty")
+    private Integer warranty;
+
     @SerializedName("images")
     private List<ProductImage> images;
 
@@ -54,6 +60,8 @@ public class ProductDetail {
     public String getDisplay() { return display; }
     public Double getPrice() { return price; }
     public Double getDiscountPrice() { return discountPrice; }
+    public Integer getStock() { return stock; }
+    public Integer getWarranty() { return warranty; }
     public String getThumbnail() { return thumbnail; }
     public List<ProductImage> getImages() { return images; }
     public Brand getBrand() { return brand; }

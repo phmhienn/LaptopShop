@@ -147,7 +147,9 @@ public class AdminProductDetailFragment extends Fragment {
                     binding.etCpu.setText(product.getCpu());
                     binding.etRam.setText(product.getRam());
                     binding.etSsd.setText(product.getSsd());
-                    
+                    binding.etStock.setText(product.getStock() != null ? String.valueOf(product.getStock()) : "");
+                    binding.etWarranty.setText(product.getWarranty() != null ? String.valueOf(product.getWarranty()) : "");
+
                     // Note: ProductDetailDTO on backend has CategoryDTO and BrandDTO, 
                     // but our app ProductDetail doesn't have brand/category fields fully populated in the short version.
                     // For the sake of simplicity, we don't auto-select Spinners.

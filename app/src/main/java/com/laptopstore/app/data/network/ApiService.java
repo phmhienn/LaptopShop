@@ -92,6 +92,12 @@ public interface ApiService {
     @POST("cart/items")
     Call<ApiResponse<Cart>> addItemToCart(@Body com.laptopstore.app.data.model.order.CartItemRequest request);
 
+    @PUT("cart/items/{itemId}")
+    Call<ApiResponse<Cart>> updateCartItemQuantity(@Path("itemId") Long itemId, @Query("quantity") int quantity);
+
+    @DELETE("cart/items/{itemId}")
+    Call<ApiResponse<Cart>> removeCartItem(@Path("itemId") Long itemId);
+
     // User Profile
     @GET("users/profile")
     Call<ApiResponse<com.laptopstore.app.data.model.user.User>> getProfile();
