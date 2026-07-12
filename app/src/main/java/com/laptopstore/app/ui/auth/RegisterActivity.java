@@ -29,7 +29,7 @@ public class RegisterActivity extends AppCompatActivity {
         binding.btnRegister.setOnClickListener(v -> performRegister());
         
         binding.tvLoginPrompt.setOnClickListener(v -> {
-            finish(); // Go back to login
+            finish();
         });
     }
 

@@ -22,11 +22,10 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
-
+    //Full Retrofit
     // Auth
     @POST("auth/login")
     Call<ApiResponse<JwtResponse>> login(@Body LoginRequest request);
-
     @POST("auth/signup")
     Call<ApiResponse<Void>> signup(@Body SignupRequest request);
 
